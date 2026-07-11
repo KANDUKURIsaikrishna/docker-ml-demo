@@ -37,13 +37,18 @@ Needs: Python 3, a running Docker engine (Docker Desktop, colima, or Rancher Des
 - **[`docs/kind-deployment.md`](docs/kind-deployment.md)** — the kind deployment (docs 04-06) as one file, plus a Docker-Hub-free shortcut for local testing.
 - **`scripts/check_prereqs.py`** — run after cloning, tells you what's missing. Same script on macOS/Linux/Windows.
 - **`scripts/push_to_dockerhub.py`** — builds, tags, pushes all 5 images, and updates `k8s/*.yaml` for you (automates docs/03).
-- **[`DEMO.md`](DEMO.md)** / **[`DEMO-windows.md`](DEMO-windows.md)** — script for live-presenting the app to students (what to click, what to say, how to break it on purpose).
+- **[`DEMO.md`](DEMO.md)** / **[`DEMO-windows.md`](DEMO-windows.md)** — Docker Compose live-demo script (what to click, what to say, how to break it on purpose).
+- **[`DEMO-kind.md`](DEMO-kind.md)** / **[`DEMO-kind-windows.md`](DEMO-kind-windows.md)** — Kubernetes live-demo script (pods, service discovery, self-heal).
 
 All 3 models use pretrained OpenCV Haar cascades — no training step, no dataset, no `.pkl` file. See [docs/01-train-models.md](docs/01-train-models.md) for how that works.
 
-## Full design
+## Architecture
 
-See [docs/superpowers/specs/2026-07-11-ml-docker-deployment-demo-design.md](docs/superpowers/specs/2026-07-11-ml-docker-deployment-demo-design.md) for the full design doc — architecture, decisions, and what's intentionally out of scope.
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — system diagram, request lifecycle, why 5 services instead of 1, Docker/K8s strategy, and "why not kustomize."
+
+## Design history
+
+See [docs/superpowers/specs/2026-07-11-ml-docker-deployment-demo-design.md](docs/superpowers/specs/2026-07-11-ml-docker-deployment-demo-design.md) for how this repo got here — decisions and what's intentionally out of scope.
 
 ## Quickest path to seeing it work
 
