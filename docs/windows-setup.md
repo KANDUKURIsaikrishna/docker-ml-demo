@@ -71,4 +71,4 @@ Python is the one tool you have to install by hand before anything else — the 
 - **`python` vs `python3`** — Windows installs usually only register `python`, not `python3`. `scripts/check_prereqs.py` accounts for this automatically; if you're typing commands from docs/01 by hand, use `python` instead of `python3` on Windows.
 - **Git line-ending warnings on clone** (`LF will be replaced by CRLF`) — harmless for this repo; none of the Dockerfiles or Python code care about line endings.
 
-Once set up, DEMO.md's live-demo flow works exactly the same on Windows — same browser, same webcam permission prompt, same `http://localhost:5000`.
+Once set up, follow [DEMO-windows.md](../DEMO-windows.md) to run the live demo — same browser, same webcam permission prompt, same `http://localhost:5000`, PowerShell commands throughout.

@@ -36,7 +36,7 @@ Needs: Python 3, a running Docker engine (Docker Desktop, colima, or Rancher Des
 - **`docs/`** — numbered, step-by-step tutorial. **Start here:** [docs/01-train-models.md](docs/01-train-models.md).
 - **`scripts/check_prereqs.py`** — run after cloning, tells you what's missing. Same script on macOS/Linux/Windows.
 - **`scripts/push_to_dockerhub.py`** — builds, tags, pushes all 5 images, and updates `k8s/*.yaml` for you (automates docs/03).
-- **[`DEMO.md`](DEMO.md)** — script for live-presenting the app to students (what to click, what to say, how to break it on purpose).
+- **[`DEMO.md`](DEMO.md)** / **[`DEMO-windows.md`](DEMO-windows.md)** — script for live-presenting the app to students (what to click, what to say, how to break it on purpose).
 
 All 3 models use pretrained OpenCV Haar cascades — no training step, no dataset, no `.pkl` file. See [docs/01-train-models.md](docs/01-train-models.md) for how that works.
 
