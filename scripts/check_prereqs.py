@@ -49,17 +49,42 @@ def check_tool(tool: dict) -> bool:
     return found
 
 
-def install_tool(tool: dict) -> None:
+def installer_command(system: str) -> str | None:
+    """Returns the installer CLI name for this platform, or None if
+    there isn't an automated one (e.g. Linux)."""
+    if system == "Darwin":
+        return "brew"
+    if system == "Windows":
+        return "winget"
+    return None
+
+
+def install_tool(tool: dict) -> bool:
+    """Attempts to install one tool. Returns True only on confirmed
+    success — never silently swallows a failed or crashed install."""
     system = platform.system()
     if system == "Darwin" and tool["brew"]:
-        print(f"Installing {tool['name']} via Homebrew...")
-        subprocess.run(["brew", "install"] + tool["brew"].split())
+        cmd = ["brew", "install"] + tool["brew"].split()
     elif system == "Windows" and tool["winget"]:
-        print(f"Installing {tool['name']} via winget...")
-        subprocess.run(["winget", "install", "--id", tool["winget"], "-e",
-                         "--accept-package-agreements", "--accept-source-agreements"])
+        cmd = ["winget", "install", "--id", tool["winget"], "-e",
+               "--accept-package-agreements", "--accept-source-agreements"]
     else:
         print(f"  No automated installer for {tool['name']} on {system}. Install manually: {tool['manual']}")
+        return False
+
+    print(f"Installing {tool['name']} via {cmd[0]}...")
+    try:
+        result = subprocess.run(cmd)
+    except FileNotFoundError:
+        print(f"  FAILED: '{cmd[0]}' isn't on PATH, so {tool['name']} wasn't installed. Install manually: {tool['manual']}")
+        return False
+
+    if result.returncode != 0:
+        print(f"  FAILED: {cmd[0]} exited with code {result.returncode} — see its output above for why. Install manually: {tool['manual']}")
+        return False
+
+    print(f"  OK: {tool['name']} installed.")
+    return True
 
 
 def main() -> int:
@@ -93,10 +118,20 @@ def main() -> int:
     if missing:
         print(f"{len(missing)} tool(s) missing.")
         if args.install:
-            for tool in missing:
-                install_tool(tool)
+            installer = installer_command(platform.system())
+            if installer and shutil.which(installer) is None:
+                store = "the Microsoft Store (search 'App Installer')" if installer == "winget" else "https://brew.sh"
+                print(f"'{installer}' isn't on PATH, so nothing can be auto-installed. Install {installer} from {store} first, then re-run with --install.")
+                return 1
+            results = {tool["name"]: install_tool(tool) for tool in missing}
+            succeeded = [name for name, ok in results.items() if ok]
+            failed = [name for name, ok in results.items() if not ok]
             print()
-            print("Install commands finished. Open a new terminal (so PATH refreshes), then re-run this script to confirm.")
+            if succeeded:
+                print(f"Installed: {', '.join(succeeded)}")
+            if failed:
+                print(f"Failed: {', '.join(failed)} — see FAILED lines above for why, or install manually.")
+            print("Open a new terminal (so PATH refreshes), then re-run this script to confirm.")
         else:
             print("Re-run with --install to install missing tools automatically, or install manually:")
             for tool in missing:
