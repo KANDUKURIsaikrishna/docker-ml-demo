@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: spam-service
+  name: smile-service
   namespace: ml-demo
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: spam-service
+      app: smile-service
   template:
     metadata:
       labels:
-        app: spam-service
+        app: smile-service
     spec:
       containers:
-        - name: spam-service
-          # Replace with the image you pushed: docker push <username>/spam-service:v1
-          image: REPLACE_WITH_YOUR_DOCKERHUB_USERNAME/spam-service:v1
+        - name: smile-service
+          # Replace with the image you pushed: docker push <username>/smile-service:v1
+          image: REPLACE_WITH_YOUR_DOCKERHUB_USERNAME/smile-service:v1
           ports:
             - containerPort: 8000
           readinessProbe:
@@ -28,11 +28,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: spam-service
+  name: smile-service
   namespace: ml-demo
 spec:
   selector:
-    app: spam-service
+    app: smile-service
   ports:
     - port: 8000
       targetPort: 8000

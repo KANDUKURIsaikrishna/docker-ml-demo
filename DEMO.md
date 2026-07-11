@@ -14,82 +14,73 @@ If Docker isn't running yet:
 
 ```bash
 # Docker Desktop: open the app, wait for the whale icon to go steady
-# colima (no Docker Desktop installed): 
+# colima (no Docker Desktop installed):
 colima start
 ```
 
-## 1. Train the models (one-time, or if you deleted the .pkl files)
+**Camera + browser check:** this demo needs webcam access over `http://localhost` — browsers allow camera access on `localhost` without HTTPS, but *not* on a plain IP or LAN hostname. If presenting from a laptop projected to a screen, run everything on the presenter's machine and open `http://localhost:5000` there, not from a second machine over the network.
 
-```bash
-for svc in iris-service diabetes-service spam-service; do
-  cd models/$svc
-  python3 -m venv venv && source venv/bin/activate
-  pip install -q -r requirements.txt
-  python train.py
-  deactivate
-  cd ../..
-done
-```
-
-Skip this if `models/*/model.pkl` already exist — they're checked into the repo.
-
-## 2. Start everything
+## 1. Start everything
 
 ```bash
 docker-compose up --build
 ```
 
-Wait for `Uvicorn running on http://0.0.0.0:8000` to appear for each service, and the frontend to show its startup line. This builds and starts all 5 containers: frontend, gateway, 3 model services.
+Wait for `Uvicorn running on http://0.0.0.0:8000` to appear for each service, and the frontend to show its startup line. This builds and starts all 5 containers: frontend, gateway, 3 model services. No training step — the models are pretrained OpenCV cascades baked into the image at `pip install` time.
 
-## 3. Open the app
+## 2. Open the app
 
 **http://localhost:5000**
 
-You'll see a dropdown (Iris / Diabetes / Spam) and an input area that changes based on your selection, plus a Predict button.
+You'll see a dropdown (Smile / Glasses / Eyes), a **Start camera** button, and a **Capture & Predict** button.
 
-## 4. Things to show students, in order
+## 3. Things to show students, in order
 
-### a. Iris classifier — the simple case
-Leave the defaults (5.1, 3.5, 1.4, 0.2), hit Predict.
-→ `{"prediction": "setosa", "confidence": 1.0}`
+### a. Start the camera
+Click **Start camera**, allow browser permission. Live video preview appears. Point out: nothing is sent to the server yet — the video only leaves the browser the moment you click Capture.
 
-Change petal length/width to something like `6.0, 2.5` → try `virginica`-leaning values (e.g. sepal 6.7, 3.1, petal 4.7, 1.5) to get a different class:
-→ `{"prediction": "versicolor", "confidence": ...}`
+### b. Smile detector
+Dropdown on "Smile detector." Smile, click **Capture & Predict**.
+→ `{"face_detected": true, "smiling": true}`
 
-**Talking point:** this request went browser → frontend → gateway → `iris-service` container, and back. Four hops, one dropdown click.
+Now hold a neutral/serious face and capture again.
+→ `{"face_detected": true, "smiling": false}`
 
-### b. Diabetes — regression, not classification
-Switch dropdown to Diabetes, leave default 10 comma-separated values, Predict.
-→ `{"prediction": 244.0}` (a number, not a class label)
+**Talking point:** this request went browser → frontend → gateway → `smile-service` container, and back, carrying the actual captured JPEG. Same 4-hop pattern as any request in this app — only the payload (an image, not JSON numbers) changed.
 
-**Talking point:** same pattern (own container, own Dockerfile, own model.pkl) but the output shape is completely different — this is why each model gets its own service instead of one giant if/else in a single container.
+### c. Glasses detector
+Switch dropdown to "Glasses detector." If you have glasses handy, capture with and without them.
+→ with glasses: `{"face_detected": true, "wearing_glasses": true, "edge_density": 0.21}`
+→ without: `{"face_detected": true, "wearing_glasses": false, "edge_density": 0.06}`
 
-### c. Spam — two artifacts, not one
-Switch to Spam, try:
-- `"WINNER!! Claim your free prize now!"` → `{"prediction": "spam", ...}`
-- `"Hey are we still on for lunch tomorrow?"` → `{"prediction": "ham", ...}`
+**Talking point:** open `models/glasses-service/app.py` — there's no "glasses" cascade, because one doesn't exist. It's a heuristic: measure edge density in the strip between your eyes (glasses frames = lots of edges, bare skin = few). Good moment to say plainly: this is not a production-grade classifier, it's tuned to be *demoable*, and the code says so in a comment. Real-world accuracy claims need real evaluation data — worth flagging explicitly so students don't walk away thinking a heuristic like this ships to production as-is.
 
-**Talking point:** open `models/spam-service/app.py` and point out it loads *two* files at startup (`model.pkl` and `vectorizer.pkl`) — not every model ships as a single artifact, and the container doesn't care, it just loads whatever the service needs.
+### d. Eyes open/closed detector
+Switch to "Eyes open/closed detector." Capture with eyes open, then try to capture mid-blink or with eyes closed.
+→ open: `{"face_detected": true, "eyes_open": true, "eyes_detected": 2}`
+→ closed: `{"face_detected": true, "eyes_open": false, "eyes_detected": 0}`
 
-### d. Break it on purpose (great demo moment)
+**Talking point:** the trick here is almost sneaky — the eye cascade was *only ever trained on open eyes*, so it simply fails to match closed ones. "No detection" becomes the signal, not an error. Worth a beat: this is inference from an absence, and absences are ambiguous (bad lighting also produces "no detection"). Point at the comment in `app.py` explaining the same limitation.
+
+### e. Break it on purpose (great demo moment)
 
 ```bash
-docker stop ml-spam-service-1
+docker stop ml-glasses-service-1
 ```
 
-Try a Spam prediction in the UI → gateway returns a clean 503, not a crash:
+Try a Glasses prediction in the UI → gateway returns a clean 503, not a crash:
 ```json
-{"detail": "spam service unavailable"}
+{"detail": "glasses service unavailable"}
 ```
 
-**Talking point:** the gateway isolates failure — iris and diabetes keep working fine while spam is down. This is the point of splitting into services instead of one monolith: one model crashing doesn't take down the whole app.
+**Talking point:** the gateway isolates failure — smile and eyes keep working fine while glasses is down. This is the point of splitting into services instead of one monolith: one model crashing doesn't take down the whole app.
 
 Bring it back:
 ```bash
-docker start ml-spam-service-1
+docker start ml-glasses-service-1
 ```
 
-### e. Show the Docker side (open a second terminal)
+### f. Show the Docker side (open a second terminal)
 
 ```bash
 docker ps
@@ -99,13 +90,13 @@ Five containers, five images, five separate processes — point at the `IMAGE` c
 ```bash
 docker logs ml-gateway-1 --tail 20
 ```
-Shows the routing happening in real time as you click Predict in the browser.
+Shows the routing happening in real time as you click Capture & Predict in the browser.
 
-## 5. If you have time: show it on Kubernetes too
+## 4. If you have time: show it on Kubernetes too
 
 Follow `docs/04-local-k8s-setup.md` onward — same UI, same predictions, but now pods instead of containers, and you can `kubectl delete pod` on a model service mid-demo to show it self-heal (see `docs/06-test-app.md`, section "Confirm it's really Kubernetes"). This is the single best "aha" moment in the whole demo — do it if the session allows.
 
-## 6. Shut down
+## 5. Shut down
 
 ```bash
 docker-compose down

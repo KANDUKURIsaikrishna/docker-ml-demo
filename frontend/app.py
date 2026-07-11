@@ -1,4 +1,4 @@
-"""Flask frontend. Serves the dropdown UI and proxies prediction
+"""Flask frontend. Serves the webcam-capture UI and proxies prediction
 requests server-side to the gateway, so the browser only ever talks to
 this one origin — no CORS, no exposing internal service DNS names to
 the client.
@@ -21,10 +21,14 @@ def index():
 
 @app.post("/api/predict/<model_name>")
 def predict(model_name):
+    image = request.files.get("image")
+    if image is None:
+        return jsonify({"detail": "no image uploaded"}), 400
+
     try:
         response = requests.post(
             f"{GATEWAY_URL}/predict/{model_name}",
-            json=request.get_json(),
+            files={"image": (image.filename, image.stream, image.mimetype)},
             timeout=REQUEST_TIMEOUT,
         )
         return jsonify(response.json()), response.status_code

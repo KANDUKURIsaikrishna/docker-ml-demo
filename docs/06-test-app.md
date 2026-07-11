@@ -17,14 +17,14 @@ kubectl get pods -n ml-demo
 Pick any pod and kill it:
 
 ```bash
-kubectl delete pod -n ml-demo <iris-service-pod-name>
+kubectl delete pod -n ml-demo <smile-service-pod-name>
 ```
 
-Refresh the app and predict with the iris model again — it still works. `kubectl get pods -n ml-demo` shows a new pod already starting to replace the one you deleted. This is the core promise of a Deployment: something restarts what dies, without you doing anything.
+Refresh the app, start the camera again, and capture a frame for the smile model — it still works. `kubectl get pods -n ml-demo` shows a new pod already starting to replace the one you deleted. This is the core promise of a Deployment: something restarts what dies, without you doing anything.
 
 ## Compare to compose
 
-Run through the same 3 predictions (iris, diabetes, spam) you tried with `docker-compose up` in step 02. Same containers, same code, same results — only the orchestration layer changed. That parity is the whole lesson of this repo.
+Run through the same 3 predictions (smile, glasses, eyes) you tried with `docker-compose up` in step 02. Same containers, same code, same results — only the orchestration layer changed. That parity is the whole lesson of this repo.
 
 ## Cleaning up
 

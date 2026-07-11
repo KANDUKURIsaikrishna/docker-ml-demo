@@ -1,29 +1,29 @@
 services:
-  iris-service:
-    build: ./models/iris-service
+  smile-service:
+    build: ./models/smile-service
     expose:
       - "8000"
 
-  diabetes-service:
-    build: ./models/diabetes-service
+  glasses-service:
+    build: ./models/glasses-service
     expose:
       - "8000"
 
-  spam-service:
-    build: ./models/spam-service
+  eyes-service:
+    build: ./models/eyes-service
     expose:
       - "8000"
 
   gateway:
     build: ./gateway
     environment:
-      IRIS_SERVICE_URL: http://iris-service:8000
-      DIABETES_SERVICE_URL: http://diabetes-service:8000
-      SPAM_SERVICE_URL: http://spam-service:8000
+      SMILE_SERVICE_URL: http://smile-service:8000
+      GLASSES_SERVICE_URL: http://glasses-service:8000
+      EYES_SERVICE_URL: http://eyes-service:8000
     depends_on:
-      - iris-service
-      - diabetes-service
-      - spam-service
+      - smile-service
+      - glasses-service
+      - eyes-service
     expose:
       - "8000"
 

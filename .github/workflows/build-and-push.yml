@@ -18,9 +18,9 @@ jobs:
     strategy:
       matrix:
         service:
-          - { name: iris-service, path: models/iris-service }
-          - { name: diabetes-service, path: models/diabetes-service }
-          - { name: spam-service, path: models/spam-service }
+          - { name: smile-service, path: models/smile-service }
+          - { name: glasses-service, path: models/glasses-service }
+          - { name: eyes-service, path: models/eyes-service }
           - { name: gateway, path: gateway }
           - { name: frontend, path: frontend }
     steps:

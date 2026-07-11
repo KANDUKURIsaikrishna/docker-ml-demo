@@ -19,7 +19,7 @@ Image names on Docker Hub must be `<your-username>/<image-name>:<tag>`. Replace 
 ```bash
 export DOCKERHUB_USERNAME=YOUR_USERNAME
 
-for svc in iris-service diabetes-service spam-service; do
+for svc in smile-service glasses-service eyes-service; do
   docker build -t $DOCKERHUB_USERNAME/$svc:v1 models/$svc
   docker push $DOCKERHUB_USERNAME/$svc:v1
 done
@@ -40,7 +40,7 @@ Check https://hub.docker.com/repositories/YOUR_USERNAME — you should see all 5
 Each file in `k8s/*-deployment.yaml` has a placeholder:
 
 ```yaml
-image: REPLACE_WITH_YOUR_DOCKERHUB_USERNAME/iris-service:v1
+image: REPLACE_WITH_YOUR_DOCKERHUB_USERNAME/smile-service:v1
 ```
 
 Replace `REPLACE_WITH_YOUR_DOCKERHUB_USERNAME` with your actual username in all 5 manifest files before moving on — a quick way:

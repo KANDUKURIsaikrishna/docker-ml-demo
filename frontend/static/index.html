@@ -7,94 +7,95 @@
     body { font-family: system-ui, sans-serif; max-width: 560px; margin: 40px auto; padding: 0 16px; }
     h1 { font-size: 1.4rem; }
     label { display: block; margin-top: 12px; font-weight: 600; }
-    select, input, button { font-size: 1rem; padding: 8px; margin-top: 4px; width: 100%; box-sizing: border-box; }
-    button { margin-top: 16px; cursor: pointer; }
+    select, button { font-size: 1rem; padding: 8px; margin-top: 4px; width: 100%; box-sizing: border-box; }
+    button { margin-top: 12px; cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: 0.5; }
+    #video, #snapshot { width: 100%; margin-top: 12px; border: 1px solid #ccc; border-radius: 6px; background: #000; }
+    #snapshot { display: none; }
     #result { margin-top: 20px; padding: 12px; border: 1px solid #ccc; border-radius: 6px; white-space: pre-wrap; font-family: monospace; }
-    .hint { color: #666; font-size: 0.85rem; margin-top: 2px; }
+    .hint { color: #666; font-size: 0.85rem; margin-top: 6px; }
   </style>
 </head>
 <body>
   <h1>ML Docker Deployment Demo</h1>
-  <p>Pick a model, send a prediction request. Each model runs in its own container behind the gateway.</p>
+  <p>Pick a model, start your camera, capture a frame. Each model runs in its own container behind the gateway.</p>
 
   <label for="model">Model</label>
   <select id="model">
-    <option value="iris">Iris classifier (4 numbers)</option>
-    <option value="diabetes">Diabetes progression (10 numbers)</option>
-    <option value="spam">Spam detector (text)</option>
+    <option value="smile">Smile detector</option>
+    <option value="glasses">Glasses detector</option>
+    <option value="eyes">Eyes open/closed detector</option>
   </select>
 
-  <div id="inputs"></div>
+  <video id="video" autoplay playsinline></video>
+  <canvas id="canvas" style="display:none;"></canvas>
+  <img id="snapshot" alt="captured frame" />
 
-  <button id="submit">Predict</button>
+  <button id="start">Start camera</button>
+  <button id="capture" disabled>Capture &amp; Predict</button>
+  <div class="hint">Nothing leaves your machine except the single frame you capture — no continuous streaming to the server.</div>
 
   <div id="result" hidden></div>
 
   <script>
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const snapshot = document.getElementById("snapshot");
+    const startBtn = document.getElementById("start");
+    const captureBtn = document.getElementById("capture");
     const modelSelect = document.getElementById("model");
-    const inputsDiv = document.getElementById("inputs");
     const resultDiv = document.getElementById("result");
 
-    const IRIS_DEFAULTS = [5.1, 3.5, 1.4, 0.2];
-    const DIABETES_DEFAULTS = [0.03, 0.05, 0.06, 0.02, -0.04, -0.03, -0.02, 0.03, 0.02, -0.01];
+    let stream = null;
 
-    function renderInputs() {
+    startBtn.addEventListener("click", async () => {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+        captureBtn.disabled = false;
+        startBtn.textContent = "Camera running";
+        startBtn.disabled = true;
+      } catch (err) {
+        resultDiv.hidden = false;
+        resultDiv.textContent = "Could not access camera: " + err;
+      }
+    });
+
+    captureBtn.addEventListener("click", async () => {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext("2d").drawImage(video, 0, 0);
+
+      snapshot.src = canvas.toDataURL("image/jpeg");
+      snapshot.style.display = "block";
+      video.style.display = "none";
+
       const model = modelSelect.value;
-      inputsDiv.innerHTML = "";
-
-      if (model === "iris") {
-        const labels = ["Sepal length", "Sepal width", "Petal length", "Petal width"];
-        labels.forEach((label, i) => {
-          inputsDiv.innerHTML += `
-            <label>${label}</label>
-            <input type="number" step="0.1" class="iris-feature" value="${IRIS_DEFAULTS[i]}" />`;
-        });
-      } else if (model === "diabetes") {
-        inputsDiv.innerHTML += `<label>10 baseline features (comma-separated)</label>
-          <input type="text" id="diabetes-features" value="${DIABETES_DEFAULTS.join(", ")}" />
-          <div class="hint">Pre-scaled values from sklearn's diabetes dataset.</div>`;
-      } else if (model === "spam") {
-        inputsDiv.innerHTML += `<label>Message text</label>
-          <input type="text" id="spam-text" value="WINNER!! Claim your free prize now!" />`;
-      }
-    }
-
-    function buildPayload() {
-      const model = modelSelect.value;
-      if (model === "iris") {
-        const features = Array.from(document.querySelectorAll(".iris-feature")).map(el => parseFloat(el.value));
-        return { features };
-      }
-      if (model === "diabetes") {
-        const features = document.getElementById("diabetes-features").value
-          .split(",").map(v => parseFloat(v.trim()));
-        return { features };
-      }
-      if (model === "spam") {
-        return { text: document.getElementById("spam-text").value };
-      }
-    }
-
-    modelSelect.addEventListener("change", renderInputs);
-    renderInputs();
-
-    document.getElementById("submit").addEventListener("click", async () => {
-      const model = modelSelect.value;
-      const payload = buildPayload();
       resultDiv.hidden = false;
       resultDiv.textContent = "Calling " + model + "-service via gateway...";
 
-      try {
-        const res = await fetch(`/api/predict/${model}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        const data = await res.json();
-        resultDiv.textContent = JSON.stringify(data, null, 2);
-      } catch (err) {
-        resultDiv.textContent = "Error: " + err;
-      }
+      canvas.toBlob(async (blob) => {
+        const formData = new FormData();
+        formData.append("image", blob, "capture.jpg");
+
+        try {
+          const res = await fetch(`/api/predict/${model}`, {
+            method: "POST",
+            body: formData,
+          });
+          const data = await res.json();
+          resultDiv.textContent = JSON.stringify(data, null, 2);
+        } catch (err) {
+          resultDiv.textContent = "Error: " + err;
+        }
+      }, "image/jpeg", 0.9);
+    });
+
+    // Switching models doesn't need a new capture — just re-show live video
+    // so the user can frame a fresh shot for the newly selected model.
+    modelSelect.addEventListener("change", () => {
+      snapshot.style.display = "none";
+      video.style.display = stream ? "block" : "none";
     });
   </script>
 </body>

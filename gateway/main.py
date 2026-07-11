@@ -2,12 +2,15 @@
 to the right model microservice by name. Service addresses come from
 env vars, defaulting to docker-compose service names — the same code
 runs unmodified against Kubernetes Service DNS names.
+
+Payload is a webcam-captured image (multipart), not JSON — the gateway
+just streams the uploaded bytes on to whichever model service owns
+that name, unchanged.
 """
 import os
-from typing import Any
 
 import httpx
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="gateway")
@@ -20,9 +23,9 @@ app.add_middleware(
 )
 
 SERVICE_URLS = {
-    "iris": os.getenv("IRIS_SERVICE_URL", "http://iris-service:8000"),
-    "diabetes": os.getenv("DIABETES_SERVICE_URL", "http://diabetes-service:8000"),
-    "spam": os.getenv("SPAM_SERVICE_URL", "http://spam-service:8000"),
+    "smile": os.getenv("SMILE_SERVICE_URL", "http://smile-service:8000"),
+    "glasses": os.getenv("GLASSES_SERVICE_URL", "http://glasses-service:8000"),
+    "eyes": os.getenv("EYES_SERVICE_URL", "http://eyes-service:8000"),
 }
 
 REQUEST_TIMEOUT = 5.0
@@ -34,14 +37,17 @@ def health():
 
 
 @app.post("/predict/{model_name}")
-async def predict(model_name: str, payload: dict[str, Any]):
+async def predict(model_name: str, image: UploadFile = File(...)):
     base_url = SERVICE_URLS.get(model_name)
     if base_url is None:
         raise HTTPException(status_code=404, detail=f"Unknown model '{model_name}'")
 
+    contents = await image.read()
+    files = {"image": (image.filename or "frame.jpg", contents, image.content_type or "image/jpeg")}
+
     try:
         async with httpx.AsyncClient(timeout=REQUEST_TIMEOUT) as client:
-            response = await client.post(f"{base_url}/predict", json=payload)
+            response = await client.post(f"{base_url}/predict", files=files)
             response.raise_for_status()
             return response.json()
     except httpx.TimeoutException:

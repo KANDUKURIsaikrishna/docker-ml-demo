@@ -21,13 +21,13 @@ spec:
             - containerPort: 8000
           env:
             # Same service names as docker-compose.yml — Kubernetes Service
-            # DNS resolves "iris-service" to the Service object below.
-            - name: IRIS_SERVICE_URL
-              value: "http://iris-service:8000"
-            - name: DIABETES_SERVICE_URL
-              value: "http://diabetes-service:8000"
-            - name: SPAM_SERVICE_URL
-              value: "http://spam-service:8000"
+            # DNS resolves "smile-service" to the Service object below.
+            - name: SMILE_SERVICE_URL
+              value: "http://smile-service:8000"
+            - name: GLASSES_SERVICE_URL
+              value: "http://glasses-service:8000"
+            - name: EYES_SERVICE_URL
+              value: "http://eyes-service:8000"
           readinessProbe:
             httpGet:
               path: /health

@@ -1,9 +1,9 @@
 # ML Docker Deployment Demo
 
-A teaching repo: dockerize and deploy 3 ML models + a gateway + a dropdown frontend, from trained model to running Kubernetes service.
+A teaching repo: dockerize and deploy 3 webcam-based ML models + a gateway + a dropdown frontend, from model code to a running Kubernetes service.
 
 ```
-Train model → Save model.pkl → Build FastAPI/Flask app → Write Dockerfile →
+Write model code → Build FastAPI/Flask app → Write Dockerfile →
 docker build → Docker Image → Push to Docker Hub →
 Deploy to Kubernetes (local kind/minikube) → Users send prediction requests
 ```
@@ -20,17 +20,19 @@ Needs: Python 3, a running Docker engine (Docker Desktop, colima, or Rancher Des
 
 ## What's here
 
-- **`frontend/`** — Flask app, dropdown UI, proxies requests to the gateway.
+- **`frontend/`** — Flask app, webcam-capture UI, proxies requests to the gateway.
 - **`gateway/`** — FastAPI, routes `/predict/{model}` to the right model microservice.
-- **`models/iris-service/`** — RandomForest classifier (iris dataset).
-- **`models/diabetes-service/`** — GradientBoostingRegressor (diabetes dataset).
-- **`models/spam-service/`** — TF-IDF + LogisticRegression spam classifier (2 artifacts: model + vectorizer).
+- **`models/smile-service/`** — smile detector (OpenCV Haar cascade, face + smile).
+- **`models/glasses-service/`** — eyeglasses detector (edge-density heuristic on the nose bridge).
+- **`models/eyes-service/`** — eyes open/closed detector (OpenCV eye cascade).
 - **`k8s/`** — Deployment + Service manifests for all 5 components.
 - **`docker-compose.yml`** — fast local run of all 5 containers, no Kubernetes needed.
 - **`.github/workflows/`** — bonus: automates the manual build/push steps.
 - **`docs/`** — numbered, step-by-step tutorial. **Start here:** [docs/01-train-models.md](docs/01-train-models.md).
 - **`scripts/check-prereqs.sh`** — run after cloning, tells you what's missing.
 - **[`DEMO.md`](DEMO.md)** — script for live-presenting the app to students (what to click, what to say, how to break it on purpose).
+
+All 3 models use pretrained OpenCV Haar cascades — no training step, no dataset, no `.pkl` file. See [docs/01-train-models.md](docs/01-train-models.md) for how that works.
 
 ## Full design
 
@@ -39,10 +41,8 @@ See [docs/superpowers/specs/2026-07-11-ml-docker-deployment-demo-design.md](docs
 ## Quickest path to seeing it work
 
 ```bash
-# 1. train all 3 models (see docs/01)
-# 2. run everything locally, no k8s:
 docker-compose up --build
-# open http://localhost:5000
+# open http://localhost:5000, click "Start camera", then "Capture & Predict"
 ```
 
 Full path including Kubernetes: follow `docs/01` through `docs/07` in order.

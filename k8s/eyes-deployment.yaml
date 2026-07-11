@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: diabetes-service
+  name: eyes-service
   namespace: ml-demo
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: diabetes-service
+      app: eyes-service
   template:
     metadata:
       labels:
-        app: diabetes-service
+        app: eyes-service
     spec:
       containers:
-        - name: diabetes-service
-          # Replace with the image you pushed: docker push <username>/diabetes-service:v1
-          image: REPLACE_WITH_YOUR_DOCKERHUB_USERNAME/diabetes-service:v1
+        - name: eyes-service
+          # Replace with the image you pushed: docker push <username>/eyes-service:v1
+          image: REPLACE_WITH_YOUR_DOCKERHUB_USERNAME/eyes-service:v1
           ports:
             - containerPort: 8000
           readinessProbe:
@@ -28,11 +28,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: diabetes-service
+  name: eyes-service
   namespace: ml-demo
 spec:
   selector:
-    app: diabetes-service
+    app: eyes-service
   ports:
     - port: 8000
       targetPort: 8000

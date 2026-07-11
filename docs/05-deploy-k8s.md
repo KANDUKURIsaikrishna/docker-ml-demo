@@ -2,7 +2,7 @@
 
 All manifests live in `k8s/`. Each `*-deployment.yaml` defines a `Deployment` (keeps N copies of a container running) and a `Service` (a stable network name + address for those copies) in one file.
 
-> **Docker beginners:** a `Deployment` is "run this image, keep it running, restart it if it crashes." A `Service` is "give whatever's running a fixed DNS name" — Pods get replaced and get new IPs constantly, but the Service name never changes. That's how `gateway` reliably finds `iris-service` even after a restart.
+> **Docker beginners:** a `Deployment` is "run this image, keep it running, restart it if it crashes." A `Service` is "give whatever's running a fixed DNS name" — Pods get replaced and get new IPs constantly, but the Service name never changes. That's how `gateway` reliably finds `smile-service` even after a restart.
 
 ## 1. Create the namespace
 
@@ -15,9 +15,9 @@ Everything below lives in the `ml-demo` namespace — keeps this demo isolated f
 ## 2. Deploy the model services first
 
 ```bash
-kubectl apply -f k8s/iris-deployment.yaml
-kubectl apply -f k8s/diabetes-deployment.yaml
-kubectl apply -f k8s/spam-deployment.yaml
+kubectl apply -f k8s/smile-deployment.yaml
+kubectl apply -f k8s/glasses-deployment.yaml
+kubectl apply -f k8s/eyes-deployment.yaml
 ```
 
 ## 3. Deploy the gateway
@@ -26,7 +26,7 @@ kubectl apply -f k8s/spam-deployment.yaml
 kubectl apply -f k8s/gateway-deployment.yaml
 ```
 
-Look at the `env` block in this file — it points at `http://iris-service:8000` etc. Those hostnames resolve because of the `Service` objects you just created in step 2. Same names as `docker-compose.yml`, same mechanism, different implementation underneath.
+Look at the `env` block in this file — it points at `http://smile-service:8000` etc. Those hostnames resolve because of the `Service` objects you just created in step 2. Same names as `docker-compose.yml`, same mechanism, different implementation underneath.
 
 ## 4. Deploy the frontend
 

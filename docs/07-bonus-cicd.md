@@ -7,8 +7,8 @@ Read the workflow file side by side with what you typed by hand:
 | Manual command | Workflow equivalent |
 |---|---|
 | `docker login` | `docker/login-action@v3` step, using secrets instead of your typed password |
-| `docker build -t $USER/iris-service:v1 models/iris-service` | `docker/build-push-action@v6` with `context: models/iris-service` |
-| `docker push $USER/iris-service:v1` | same step, `push: true` |
+| `docker build -t $USER/smile-service:v1 models/smile-service` | `docker/build-push-action@v6` with `context: models/smile-service` |
+| `docker push $USER/smile-service:v1` | same step, `push: true` |
 | repeating for 5 services | `strategy.matrix.service` — one job definition, runs 5 times |
 
 Nothing new conceptually — it's the same 3 commands, run by GitHub's servers instead of your terminal, on a trigger instead of by hand.
@@ -28,4 +28,4 @@ Automating a pipeline before you understand its manual steps just hides what's a
 
 ---
 
-That's the full loop: train → serve → containerize → push → deploy → predict. From here, the natural next step (not built out in this repo) is pointing the same manifests at a real AWS EKS cluster instead of `kind` — the YAML barely changes, only the registry auth and cluster target do.
+That's the full loop: model → serve → containerize → push → deploy → predict. From here, the natural next step (not built out in this repo) is pointing the same manifests at a real AWS EKS cluster instead of `kind` — the YAML barely changes, only the registry auth and cluster target do.

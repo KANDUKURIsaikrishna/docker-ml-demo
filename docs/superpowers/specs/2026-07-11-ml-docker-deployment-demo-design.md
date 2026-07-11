@@ -120,3 +120,19 @@ Docs are tiered: Docker-101 explanations (what a layer is, what `EXPOSE` does, w
 - Ingress / TLS / autoscaling — mentioned as stretch ideas, not implemented.
 - Authentication on the API — demo is unauthenticated by design, kept simple for the teaching context.
 - Model monitoring/retraining pipelines — out of scope, this demo stops at "prediction requests work."
+
+## Addendum (2026-07-11): pivot to webcam image models
+
+After initial build and verification, the model layer was replaced. The original tabular/text models (iris classifier, diabetes regressor, spam detector) required hand-typed feature vectors as input — technically correct but hard for a live audience to trust or intuitively evaluate ("is 5.1, 3.5, 1.4, 0.2 a reasonable iris?"). Architecture, container count, Docker/K8s pipeline, and docs structure are unchanged; only the model layer and the input contract changed.
+
+**New models**, all webcam-photo input, all zero-training (OpenCV Haar cascades bundled in `opencv-python-headless`, no `.pkl`, no dataset):
+
+- **`smile-service`** — face + smile cascade, high `minNeighbors` to suppress false positives.
+- **`glasses-service`** — no glasses cascade exists; uses a classic heuristic instead (Canny edge density on the nose-bridge strip between the eyes).
+- **`eyes-service`** — eye cascade is trained on open eyes only, so a failed match in the eye region is read as "eyes closed."
+
+**Input contract changed:** JSON floats → multipart image upload, at every hop (frontend → gateway → model service). The frontend UI changed from number-field forms to a `getUserMedia()` webcam preview + capture button; `canvas.toBlob()` produces the JPEG sent as `FormData`. The gateway and Flask proxy both switched from `httpx.post(json=...)` / `requests.post(json=...)` to `files=...` multipart forwarding — same routing/error-handling logic, different payload shape.
+
+**Docs impact:** `docs/01` changed from "train the models" to "how Haar cascades work (no training required)" since there's no training step anymore. `docs/02-07` had model names swapped (`iris/diabetes/spam` → `smile/glasses/eyes`) and the compose/k8s walkthroughs updated for webcam capture instead of number-field input. `DEMO.md` was rewritten around live camera interaction, including a smile/neutral and glasses on/off comparison, and a "kill a container mid-demo" failure-isolation moment — verified to actually match gateway behavior (503 + `"<model> service unavailable"`), not just described.
+
+**Explicitly accepted tradeoff:** Haar cascade heuristics are "good enough for a live demo," not production-accuracy classifiers — lighting and head angle affect all three. This is called out in code comments, `docs/01`, and `DEMO.md` so students don't mistake a teaching heuristic for a shippable model.

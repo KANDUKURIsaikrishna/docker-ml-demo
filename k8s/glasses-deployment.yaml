@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: iris-service
+  name: glasses-service
   namespace: ml-demo
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: iris-service
+      app: glasses-service
   template:
     metadata:
       labels:
-        app: iris-service
+        app: glasses-service
     spec:
       containers:
-        - name: iris-service
-          # Replace with the image you pushed: docker push <username>/iris-service:v1
-          image: REPLACE_WITH_YOUR_DOCKERHUB_USERNAME/iris-service:v1
+        - name: glasses-service
+          # Replace with the image you pushed: docker push <username>/glasses-service:v1
+          image: REPLACE_WITH_YOUR_DOCKERHUB_USERNAME/glasses-service:v1
           ports:
             - containerPort: 8000
           readinessProbe:
@@ -28,11 +28,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: iris-service
+  name: glasses-service
   namespace: ml-demo
 spec:
   selector:
-    app: iris-service
+    app: glasses-service
   ports:
     - port: 8000
       targetPort: 8000
