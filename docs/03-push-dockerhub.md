@@ -51,4 +51,14 @@ sed -i '' "s/REPLACE_WITH_YOUR_DOCKERHUB_USERNAME/$DOCKERHUB_USERNAME/g" k8s/*.y
 
 (Drop the `''` after `-i` if you're on Linux, not macOS.)
 
+## Doing this again later
+
+Once you understand what the commands above actually do, `scripts/push-to-dockerhub.sh` (`scripts/push-to-dockerhub.ps1` on Windows) automates steps 2-4 in one command:
+
+```bash
+./scripts/push-to-dockerhub.sh YOUR_DOCKERHUB_USERNAME
+```
+
+Same reasoning as the CI/CD bonus in docs/07: automate it after you've done it by hand once, not instead of.
+
 Next: [04 — Local Kubernetes setup](04-local-k8s-setup.md)

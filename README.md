@@ -13,10 +13,13 @@ Deploy to Kubernetes (local kind/minikube) → Users send prediction requests
 Clone, then check what's missing:
 
 ```bash
-./scripts/check-prereqs.sh
+./scripts/check-prereqs.sh          # Mac/Linux
+powershell -ExecutionPolicy Bypass -File scripts\check-prereqs.ps1   # Windows
 ```
 
 Needs: Python 3, a running Docker engine (Docker Desktop, colima, or Rancher Desktop — any of them work, `docker login` is only required later for pushing images), `docker-compose`. `kubectl` + `kind` only if you're going past docs/03 into Kubernetes.
+
+**Windows:** see [docs/windows-setup.md](docs/windows-setup.md) — required installs, winget one-liners, and the WSL2/Docker Desktop gotchas.
 
 ## What's here
 
@@ -29,7 +32,8 @@ Needs: Python 3, a running Docker engine (Docker Desktop, colima, or Rancher Des
 - **`docker-compose.yml`** — fast local run of all 5 containers, no Kubernetes needed.
 - **`.github/workflows/`** — bonus: automates the manual build/push steps.
 - **`docs/`** — numbered, step-by-step tutorial. **Start here:** [docs/01-train-models.md](docs/01-train-models.md).
-- **`scripts/check-prereqs.sh`** — run after cloning, tells you what's missing.
+- **`scripts/check-prereqs.sh`** / **`scripts/check-prereqs.ps1`** — run after cloning, tells you what's missing (Mac/Linux and Windows).
+- **`scripts/push-to-dockerhub.sh`** / **`scripts/push-to-dockerhub.ps1`** — builds, tags, pushes all 5 images, and updates `k8s/*.yaml` for you (automates docs/03).
 - **[`DEMO.md`](DEMO.md)** — script for live-presenting the app to students (what to click, what to say, how to break it on purpose).
 
 All 3 models use pretrained OpenCV Haar cascades — no training step, no dataset, no `.pkl` file. See [docs/01-train-models.md](docs/01-train-models.md) for how that works.

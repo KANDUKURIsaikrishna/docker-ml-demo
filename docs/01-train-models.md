@@ -30,6 +30,8 @@ uvicorn app:app --reload
 deactivate
 ```
 
+**Windows (PowerShell):** replace the venv line with `python -m venv venv; venv\Scripts\Activate.ps1` — everything else is identical. Full Windows setup: [docs/windows-setup.md](windows-setup.md).
+
 Open http://localhost:8000/docs — FastAPI's built-in UI. Use "Try it out" on `/predict`, upload any photo with a face in it, see the JSON response. This confirms the model logic works before Docker adds another layer to debug through.
 
 Repeat for `glasses-service` and `eyes-service` if you want to poke at all three before containerizing.
