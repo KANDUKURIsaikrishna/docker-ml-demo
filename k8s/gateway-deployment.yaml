@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+  namespace: ml-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway
+  template:
+    metadata:
+      labels:
+        app: gateway
+    spec:
+      containers:
+        - name: gateway
+          # Replace with the image you pushed: docker push <username>/gateway:v1
+          image: REPLACE_WITH_YOUR_DOCKERHUB_USERNAME/gateway:v1
+          ports:
+            - containerPort: 8000
+          env:
+            # Same service names as docker-compose.yml — Kubernetes Service
+            # DNS resolves "iris-service" to the Service object below.
+            - name: IRIS_SERVICE_URL
+              value: "http://iris-service:8000"
+            - name: DIABETES_SERVICE_URL
+              value: "http://diabetes-service:8000"
+            - name: SPAM_SERVICE_URL
+              value: "http://spam-service:8000"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway
+  namespace: ml-demo
+spec:
+  selector:
+    app: gateway
+  ports:
+    - port: 8000
+      targetPort: 8000
+  type: ClusterIP

@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spam-service
+  namespace: ml-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spam-service
+  template:
+    metadata:
+      labels:
+        app: spam-service
+    spec:
+      containers:
+        - name: spam-service
+          # Replace with the image you pushed: docker push <username>/spam-service:v1
+          image: REPLACE_WITH_YOUR_DOCKERHUB_USERNAME/spam-service:v1
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spam-service
+  namespace: ml-demo
+spec:
+  selector:
+    app: spam-service
+  ports:
+    - port: 8000
+      targetPort: 8000
+  type: ClusterIP

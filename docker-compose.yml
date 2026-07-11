@@ -1,0 +1,37 @@
+services:
+  iris-service:
+    build: ./models/iris-service
+    expose:
+      - "8000"
+
+  diabetes-service:
+    build: ./models/diabetes-service
+    expose:
+      - "8000"
+
+  spam-service:
+    build: ./models/spam-service
+    expose:
+      - "8000"
+
+  gateway:
+    build: ./gateway
+    environment:
+      IRIS_SERVICE_URL: http://iris-service:8000
+      DIABETES_SERVICE_URL: http://diabetes-service:8000
+      SPAM_SERVICE_URL: http://spam-service:8000
+    depends_on:
+      - iris-service
+      - diabetes-service
+      - spam-service
+    expose:
+      - "8000"
+
+  frontend:
+    build: ./frontend
+    environment:
+      GATEWAY_URL: http://gateway:8000
+    depends_on:
+      - gateway
+    ports:
+      - "5000:5000"
