@@ -5,7 +5,7 @@ For running the app live in front of students — fastest path to a working UI, 
 ## 0. Before the session
 
 ```bash
-./scripts/check-prereqs.sh
+python3 scripts/check_prereqs.py
 ```
 
 Fix anything marked MISSING. Do this before students arrive, not on stage.

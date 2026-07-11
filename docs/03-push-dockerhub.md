@@ -53,10 +53,10 @@ sed -i '' "s/REPLACE_WITH_YOUR_DOCKERHUB_USERNAME/$DOCKERHUB_USERNAME/g" k8s/*.y
 
 ## Doing this again later
 
-Once you understand what the commands above actually do, `scripts/push-to-dockerhub.sh` (`scripts/push-to-dockerhub.ps1` on Windows) automates steps 2-4 in one command:
+Once you understand what the commands above actually do, `scripts/push_to_dockerhub.py` automates steps 2-4 in one command — same script on macOS, Linux, and Windows:
 
 ```bash
-./scripts/push-to-dockerhub.sh YOUR_DOCKERHUB_USERNAME
+python3 scripts/push_to_dockerhub.py YOUR_DOCKERHUB_USERNAME
 ```
 
 Same reasoning as the CI/CD bonus in docs/07: automate it after you've done it by hand once, not instead of.
