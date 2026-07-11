@@ -36,9 +36,13 @@ async def predict(image: UploadFile = File(...)):
     x, y, w, h = max(faces, key=lambda f: f[2] * f[3])
     face_roi = gray[y : y + h, x : x + w]
 
-    # minNeighbors is high here on purpose — the smile cascade is
-    # notoriously trigger-happy at low thresholds and flags neutral
-    # faces as smiling. ~20 cuts false positives down substantially.
-    smiles = smile_cascade.detectMultiScale(face_roi, scaleFactor=1.7, minNeighbors=20, minSize=(25, 25))
+    # Scope the search to the mouth/chin region only. Running the smile
+    # cascade over the whole face (eyes, forehead included) makes a high
+    # minNeighbors threshold nearly impossible to satisfy even for a real
+    # smile — the mouth pattern is a small fraction of a noisy full-face
+    # search area. Scoping it first lets a moderate minNeighbors still
+    # filter false positives without starving real smiles of matches.
+    mouth_roi = face_roi[int(h * 0.5) :, :]
+    smiles = smile_cascade.detectMultiScale(mouth_roi, scaleFactor=1.7, minNeighbors=15, minSize=(25, 25))
 
     return {"face_detected": True, "smiling": len(smiles) > 0}

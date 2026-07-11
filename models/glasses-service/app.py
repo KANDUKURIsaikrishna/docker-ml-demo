@@ -17,7 +17,13 @@ app = FastAPI(title="glasses-service")
 
 CASCADE_DIR = cv2.data.haarcascades
 face_cascade = cv2.CascadeClassifier(CASCADE_DIR + "haarcascade_frontalface_default.xml")
-eye_cascade = cv2.CascadeClassifier(CASCADE_DIR + "haarcascade_eye.xml")
+# The plain eye cascade is trained on bare eyes and reliably fails to
+# match when eyeglasses are worn — which is exactly the population this
+# service needs to locate accurately. The eye_tree_eyeglasses variant is
+# trained to detect eyes whether or not glasses are present, so the eye
+# line (and therefore the nose-bridge strip below) lands in the right
+# place regardless of what we're trying to detect.
+eye_cascade = cv2.CascadeClassifier(CASCADE_DIR + "haarcascade_eye_tree_eyeglasses.xml")
 
 EDGE_DENSITY_THRESHOLD = 0.15
 

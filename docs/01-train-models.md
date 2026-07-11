@@ -13,9 +13,9 @@ That line alone gives you a working face detector. Each service loads 1-2 of the
 
 ## What each service does
 
-- **`models/smile-service/app.py`** — finds the largest face in the frame, then runs a smile cascade on it. High `minNeighbors` on purpose (~20) — the smile cascade is trigger-happy at low thresholds and calls neutral faces "smiling."
-- **`models/glasses-service/app.py`** — no cascade classifies "wearing glasses" directly. Instead it finds the eye line, crops the nose-bridge strip between the eyes, and measures edge density there with a Canny edge detector. Glasses frames create a dense band of edges that bare skin doesn't.
-- **`models/eyes-service/app.py`** — the eye cascade is trained on *open*-eye images, so it reliably fails to match closed eyes. No detection in the eye region after finding a face is read as "eyes closed."
+- **`models/smile-service/app.py`** — finds the largest face in the frame, crops to the mouth/chin region, then runs a smile cascade on just that area. Scoping the search to the mouth (instead of the whole face) is what makes a strict `minNeighbors` threshold actually reliable — searching the whole face for a small mouth-shaped pattern starves real smiles of matches.
+- **`models/glasses-service/app.py`** — no cascade classifies "wearing glasses" directly. Instead it locates the eye line using `haarcascade_eye_tree_eyeglasses.xml` (trained to detect eyes whether or not glasses are worn — the plain eye cascade fails specifically on glasses-wearers, which would break this for exactly the case we care about), crops the nose-bridge strip between the eyes, and measures edge density there with a Canny edge detector. Glasses frames create a dense band of edges that bare skin doesn't.
+- **`models/eyes-service/app.py`** — the eye cascade is trained on *open*-eye images, so it reliably fails to match closed eyes. A single eye detection is enough to call it "open" — requiring both eyes is too strict in practice, since head angle or glare routinely hides one eye even when both are open.
 
 None of these are production-grade classifiers — lighting and head angle affect all three. That's an acceptable tradeoff here: the lesson is Docker/Kubernetes, not model accuracy, and all three are honest about their limits in code comments.
 

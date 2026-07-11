@@ -39,6 +39,11 @@ async def predict(image: UploadFile = File(...)):
     # region cuts false positives from nostrils/mouth.
     upper_face = gray[y : y + int(h * 0.6), x : x + w]
 
-    eyes = eye_cascade.detectMultiScale(upper_face, scaleFactor=1.1, minNeighbors=8, minSize=(20, 20))
+    eyes = eye_cascade.detectMultiScale(upper_face, scaleFactor=1.1, minNeighbors=5, minSize=(20, 20))
 
-    return {"face_detected": True, "eyes_open": len(eyes) >= 2, "eyes_detected": len(eyes)}
+    # Requiring both eyes detected is too strict in practice — head angle,
+    # glare, or hair routinely leaves only one eye cleanly matched even
+    # when both are open. Since this cascade only matches open eyes at
+    # all (see module docstring), a single detection is already strong
+    # evidence of "open," not just a partial result.
+    return {"face_detected": True, "eyes_open": len(eyes) >= 1, "eyes_detected": len(eyes)}
