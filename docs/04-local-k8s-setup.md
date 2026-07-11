@@ -2,6 +2,8 @@
 
 You need a Kubernetes cluster to deploy into. `kind` (Kubernetes-in-Docker) is the easiest local option since you already have Docker installed.
 
+> Want the whole kind deployment (docs 04-06) as one file instead of three, plus a way to skip Docker Hub entirely for local testing? See [docs/kind-deployment.md](kind-deployment.md).
+
 > **Docker beginners:** Kubernetes is a program that runs *many* containers across *many* machines, restarts them when they crash, and gives them stable network names to find each other by. `kind` fakes "many machines" using Docker containers, so you get a real cluster without a cloud account.
 
 ## Install kind and kubectl

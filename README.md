@@ -34,6 +34,7 @@ Needs: Python 3, a running Docker engine (Docker Desktop, colima, or Rancher Des
 - **`docker-compose.yml`** — fast local run of all 5 containers, no Kubernetes needed.
 - **`.github/workflows/`** — bonus: automates the manual build/push steps.
 - **`docs/`** — numbered, step-by-step tutorial. **Start here:** [docs/01-train-models.md](docs/01-train-models.md).
+- **[`docs/kind-deployment.md`](docs/kind-deployment.md)** — the kind deployment (docs 04-06) as one file, plus a Docker-Hub-free shortcut for local testing.
 - **`scripts/check_prereqs.py`** — run after cloning, tells you what's missing. Same script on macOS/Linux/Windows.
 - **`scripts/push_to_dockerhub.py`** — builds, tags, pushes all 5 images, and updates `k8s/*.yaml` for you (automates docs/03).
 - **[`DEMO.md`](DEMO.md)** / **[`DEMO-windows.md`](DEMO-windows.md)** — script for live-presenting the app to students (what to click, what to say, how to break it on purpose).
