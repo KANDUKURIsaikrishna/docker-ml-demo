@@ -25,7 +25,11 @@ face_cascade = cv2.CascadeClassifier(CASCADE_DIR + "haarcascade_frontalface_defa
 # place regardless of what we're trying to detect.
 eye_cascade = cv2.CascadeClassifier(CASCADE_DIR + "haarcascade_eye_tree_eyeglasses.xml")
 
-EDGE_DENSITY_THRESHOLD = 0.15
+# Calibrated from real captures (one user, one webcam, one lighting
+# setup): no-glasses measured 0.0731, with-glasses measured 0.1411.
+# Threshold is the midpoint. This is two data points, not a validated
+# dataset — expect to retune per-camera/lighting if it misfires.
+EDGE_DENSITY_THRESHOLD = 0.1071
 
 
 @app.get("/health")
